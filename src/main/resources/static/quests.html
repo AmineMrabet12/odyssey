@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quests — Odyssey</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="aurora"></div>
+  <canvas id="particles-bg"></canvas>
+
+  <div class="page-wrapper">
+    <nav class="nav">
+      <a href="/" class="nav-logo">⚔ ODYSSEY</a>
+      <ul class="nav-links">
+        <li><a href="/dashboard.html">🗺️ Dashboard</a></li>
+        <li><a href="/quests.html" class="active">⚔️ Quests</a></li>
+        <li><a href="/guild.html">🛡️ Guild</a></li>
+        <li><a href="/achievements.html">🏆 Achievements</a></li>
+      </ul>
+      <div class="nav-user">
+        <div class="nav-avatar" id="nav-avatar-icon">🧙</div>
+        <div>
+          <div id="nav-username" style="font-size:0.9rem;font-weight:600">Hero</div>
+          <div id="nav-xp-mini" class="nav-xp-mini">0 XP</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⚔️ Quest Board</div>
+          <div class="page-sub">Manage your life quests. Complete missions. Earn glory.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateQuest()">+ New Quest</button>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterQuests('ALL', this)">All</button>
+        <button class="filter-btn" onclick="filterQuests('ACTIVE', this)">⚡ Active</button>
+        <button class="filter-btn" onclick="filterQuests('COMPLETED', this)">✅ Completed</button>
+        <button class="filter-btn" onclick="filterQuests('PAUSED', this)">⏸ Paused</button>
+        <button class="filter-btn" onclick="filterQuests('ABANDONED', this)">💀 Abandoned</button>
+        <span style="flex:1"></span>
+        <button class="filter-btn" onclick="filterDiff('LEGENDARY', this)">👑 Legendary</button>
+        <button class="filter-btn" onclick="filterDiff('HARD', this)">💀 Hard</button>
+      </div>
+
+      <div class="content-area">
+        <div class="quests-grid" id="quests-container">
+          <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Quest Modal -->
+  <div class="modal-overlay" id="quest-modal">
+    <div class="modal">
+      <div class="modal-title">⚔️ Forge New Quest</div>
+      <button class="modal-close" onclick="closeModal('quest-modal')">✕</button>
+      <div class="form-group">
+        <label class="form-label">Quest Title</label>
+        <input class="form-input" id="q-title" placeholder="Name your quest..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="q-desc" placeholder="What is this quest about?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Difficulty</label>
+          <select class="form-select" id="q-diff">
+            <option value="EASY">⚡ Easy (100 XP)</option>
+            <option value="MEDIUM" selected>🔥 Medium (250 XP)</option>
+            <option value="HARD">💀 Hard (500 XP)</option>
+            <option value="LEGENDARY">👑 Legendary (1000 XP)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">XP Reward</label>
+          <input class="form-input" id="q-xp" type="number" value="250" min="10" max="9999" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categories</label>
+        <div id="q-categories" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Missions (sub-tasks)</label>
+        <div id="q-missions-list" style="margin-bottom:0.5rem"></div>
+        <div style="display:flex;gap:0.5rem">
+          <input class="form-input" id="q-mission-input" placeholder="Add a mission step..." style="flex:1" />
+          <button class="btn btn-ghost btn-sm" onclick="addMissionToForm()">+</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('quest-modal')">Cancel</button>
+        <button class="btn btn-gold" onclick="saveQuest()">⚡ Forge Quest</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quest Detail Modal -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal" style="max-width:620px">
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/particles.js"></script>
+  <script src="/js/quests.js"></script>
+</body>
+</html>

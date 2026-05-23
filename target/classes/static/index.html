@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Odyssey — Your Life as an RPG</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="aurora"></div>
+  <canvas id="particles-bg"></canvas>
+
+  <div class="page-wrapper">
+    <nav class="nav">
+      <a href="/" class="nav-logo">⚔ ODYSSEY</a>
+      <ul class="nav-links">
+        <li><a href="/dashboard.html">🗺️ Dashboard</a></li>
+        <li><a href="/quests.html">⚔️ Quests</a></li>
+        <li><a href="/guild.html">🛡️ Guild</a></li>
+        <li><a href="/achievements.html">🏆 Achievements</a></li>
+      </ul>
+      <div id="nav-user" class="nav-user" style="display:none">
+        <div class="nav-avatar" id="nav-avatar-icon">🧙</div>
+        <div>
+          <div id="nav-username" style="font-size:0.9rem;font-weight:600"></div>
+          <div id="nav-xp-mini" class="nav-xp-mini"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-badge">⚡ Turn Real Life into an Epic Adventure</div>
+      <h1 class="hero-title">Your Life.<br>Your Quest.</h1>
+      <p class="hero-sub">Set goals. Complete missions. Earn XP. Level up. Join guilds. Unlock achievements. Make every day legendary.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" onclick="openAuth('register')">⚔️ Begin Your Journey</button>
+        <button class="btn btn-ghost" onclick="openAuth('login')">Already a Hero? Login</button>
+      </div>
+
+      <div class="features-grid">
+        <div class="card feature-card slide-up stagger-1">
+          <div class="feature-icon">🗺️</div>
+          <div class="feature-title">Epic Quest System</div>
+          <div class="feature-desc">Break your goals into quests with difficulties from Easy to Legendary. Track missions, progress, and XP rewards.</div>
+        </div>
+        <div class="card feature-card slide-up stagger-2">
+          <div class="feature-icon">🏆</div>
+          <div class="feature-title">Achievements & Ranks</div>
+          <div class="feature-desc">Unlock achievements as you grow. Rise from Apprentice to Dragon Slayer across 8 levels of glory.</div>
+        </div>
+        <div class="card feature-card slide-up stagger-3">
+          <div class="feature-icon">⚔️</div>
+          <div class="feature-title">Guild System</div>
+          <div class="feature-desc">Join elite guilds, compete on leaderboards, and conquer challenges together with your team.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <div class="auth-logo">
+        <h1>⚔ ODYSSEY</h1>
+        <p>Your Life as an RPG</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create Hero</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="login-username" placeholder="Enter your username" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="login-password" type="password" placeholder="Enter your password" />
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="doLogin()">⚔️ Enter the Realm</button>
+        <p style="text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--text-dim)">
+          Try: <code style="color:var(--purple-light)">DragonSlayer</code> — or create a new hero
+        </p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Choose Your Name</label>
+          <input class="form-input" id="reg-username" placeholder="Hero name (3-30 chars)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="reg-email" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="reg-password" type="password" placeholder="Min 6 characters" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Choose Your Class</label>
+          <div class="class-selector">
+            <button class="class-option selected" data-class="WARRIOR" onclick="selectClass(this)">
+              <span class="class-icon">⚔️</span>WARRIOR
+            </button>
+            <button class="class-option" data-class="MAGE" onclick="selectClass(this)">
+              <span class="class-icon">🧙</span>MAGE
+            </button>
+            <button class="class-option" data-class="ROGUE" onclick="selectClass(this)">
+              <span class="class-icon">🗡️</span>ROGUE
+            </button>
+            <button class="class-option" data-class="PALADIN" onclick="selectClass(this)">
+              <span class="class-icon">🛡️</span>PALADIN
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="reg-fullname" placeholder="Your real name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Battle Cry (Bio)</label>
+          <textarea class="form-textarea" id="reg-bio" placeholder="Describe your hero..."></textarea>
+        </div>
+        <button class="btn btn-gold" style="width:100%" onclick="doRegister()">⚡ Forge Your Legend</button>
+      </div>
+
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/particles.js"></script>
+  <script>
+    let selectedClass = 'WARRIOR';
+
+    function selectClass(btn) {
+      document.querySelectorAll('.class-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedClass = btn.dataset.class;
+    }
+
+    function openAuth(tab) {
+      document.getElementById('auth-modal').classList.add('open');
+      switchTab(tab);
+    }
+
+    function closeAuth() {
+      document.getElementById('auth-modal').classList.remove('open');
+    }
+
+    function switchTab(tab) {
+      document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    }
+
+    async function doLogin() {
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!username) return showToast('Enter your username', 'error');
+      try {
+        const users = await api.get('/users');
+        const user = users.find(u => u.username === username);
+        if (!user) return showToast('Hero not found. Create an account!', 'error');
+        localStorage.setItem('odyssey_user', JSON.stringify(user));
+        showToast(`Welcome back, ${user.username}! 🗡️`, 'success');
+        setTimeout(() => window.location.href = '/dashboard.html', 800);
+      } catch (e) {
+        showToast('Connection failed. Is the server running?', 'error');
+      }
+    }
+
+    async function doRegister() {
+      const username = document.getElementById('reg-username').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const fullName = document.getElementById('reg-fullname').value.trim();
+      const bio = document.getElementById('reg-bio').value.trim();
+      if (!username || !email || !password) return showToast('Fill in all required fields', 'error');
+      try {
+        const user = await api.post('/users', { username, email, password });
+        await api.post(`/profiles?userId=${user.id}`, {
+          fullName: fullName || username,
+          avatarClass: selectedClass,
+          bio: bio || 'A new hero rises.'
+        });
+        localStorage.setItem('odyssey_user', JSON.stringify(user));
+        showToast(`Hero ${username} created! Your legend begins! ⚡`, 'success');
+        setTimeout(() => window.location.href = '/dashboard.html', 1000);
+      } catch (e) {
+        showToast(e.message || 'Registration failed', 'error');
+      }
+    }
+
+    // Check if already logged in
+    const stored = localStorage.getItem('odyssey_user');
+    if (stored) {
+      const u = JSON.parse(stored);
+      document.getElementById('nav-user').style.display = 'flex';
+      document.getElementById('nav-username').textContent = u.username;
+      document.getElementById('nav-xp-mini').textContent = `${u.xp} XP`;
+    }
+  </script>
+</body>
+</html>

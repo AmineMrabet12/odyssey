@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Achievements — Odyssey</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="aurora"></div>
+  <canvas id="particles-bg"></canvas>
+
+  <div class="page-wrapper">
+    <nav class="nav">
+      <a href="/" class="nav-logo">⚔ ODYSSEY</a>
+      <ul class="nav-links">
+        <li><a href="/dashboard.html">🗺️ Dashboard</a></li>
+        <li><a href="/quests.html">⚔️ Quests</a></li>
+        <li><a href="/guild.html">🛡️ Guild</a></li>
+        <li><a href="/achievements.html" class="active">🏆 Achievements</a></li>
+      </ul>
+      <div class="nav-user">
+        <div class="nav-avatar" id="nav-avatar-icon">🧙</div>
+        <div>
+          <div id="nav-username" style="font-size:0.9rem;font-weight:600">Hero</div>
+          <div id="nav-xp-mini" class="nav-xp-mini">0 XP</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🏆 Hall of Achievements</div>
+          <div class="page-sub">Every hero leaves a legend. What will yours be?</div>
+        </div>
+        <div id="unlock-count" style="text-align:right">
+          <div class="stat-value" id="ach-count" style="font-size:1.5rem">0/0</div>
+          <div class="stat-label">Unlocked</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterAch('ALL', this)">All</button>
+        <button class="filter-btn" onclick="filterAch('COMMON', this)">Common</button>
+        <button class="filter-btn" onclick="filterAch('RARE', this)">Rare</button>
+        <button class="filter-btn" onclick="filterAch('EPIC', this)">Epic</button>
+        <button class="filter-btn" onclick="filterAch('LEGENDARY', this)">Legendary</button>
+      </div>
+
+      <div class="content-area">
+        <!-- XP Progress Overview -->
+        <div class="card" style="margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap">
+            <div>
+              <div style="font-family:'Cinzel',serif;font-size:1.1rem;color:var(--text);margin-bottom:0.25rem">Your XP Progress</div>
+              <div style="font-size:0.875rem;color:var(--text-dim)">Earn more XP to unlock achievements</div>
+            </div>
+            <div style="text-align:right">
+              <div id="hero-xp-display" style="font-family:'Cinzel',serif;font-size:1.5rem;color:var(--gold)">0 XP</div>
+              <div style="font-size:0.8rem;color:var(--text-dim)">Current Total</div>
+            </div>
+          </div>
+          <div class="xp-bar-wrap" style="margin-top:1rem">
+            <div class="xp-bar" style="height:12px">
+              <div class="xp-bar-fill" id="hero-xp-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="achievements-grid" id="ach-grid">
+          <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/particles.js"></script>
+  <script src="/js/achievements.js"></script>
+</body>
+</html>

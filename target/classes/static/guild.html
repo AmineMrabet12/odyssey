@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guild — Odyssey</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="aurora"></div>
+  <canvas id="particles-bg"></canvas>
+
+  <div class="page-wrapper">
+    <nav class="nav">
+      <a href="/" class="nav-logo">⚔ ODYSSEY</a>
+      <ul class="nav-links">
+        <li><a href="/dashboard.html">🗺️ Dashboard</a></li>
+        <li><a href="/quests.html">⚔️ Quests</a></li>
+        <li><a href="/guild.html" class="active">🛡️ Guild</a></li>
+        <li><a href="/achievements.html">🏆 Achievements</a></li>
+      </ul>
+      <div class="nav-user">
+        <div class="nav-avatar" id="nav-avatar-icon">🧙</div>
+        <div>
+          <div id="nav-username" style="font-size:0.9rem;font-weight:600">Hero</div>
+          <div id="nav-xp-mini" class="nav-xp-mini">0 XP</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🛡️ Guild Hall</div>
+          <div class="page-sub">Unite with fellow heroes. Conquer together.</div>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <button class="btn btn-ghost" onclick="openCreateGuild()">+ Found Guild</button>
+        </div>
+      </div>
+
+      <div class="content-area" style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem">
+
+        <!-- My Guild / Guild List -->
+        <div>
+          <div id="my-guild-section"></div>
+          <div class="section-title" style="margin-top:1.5rem">🏰 All Guilds</div>
+          <div id="guilds-list" class="guild-list">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div>
+          <div class="card" style="position:sticky;top:80px">
+            <div class="section-title">👑 Guild Leaderboard</div>
+            <div id="guild-leaderboard">
+              <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Guild Modal -->
+  <div class="modal-overlay" id="create-guild-modal">
+    <div class="modal">
+      <div class="modal-title">🏰 Found a New Guild</div>
+      <button class="modal-close" onclick="closeModal('create-guild-modal')">✕</button>
+      <div class="form-group">
+        <label class="form-label">Guild Name</label>
+        <input class="form-input" id="g-name" placeholder="Name your guild..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emblem (Emoji)</label>
+        <input class="form-input" id="g-emblem" placeholder="⚔️ 🐉 🌙 ..." maxlength="4" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Motto</label>
+        <input class="form-input" id="g-motto" placeholder="Your battle cry..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="g-desc" placeholder="What does your guild stand for?"></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('create-guild-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="createGuild()">⚔️ Found Guild</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/particles.js"></script>
+  <script src="/js/guild.js"></script>
+</body>
+</html>
