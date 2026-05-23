@@ -62,6 +62,16 @@ for /d %%d in ("C:\Program Files\Microsoft\jdk-21*") do (
     )
 )
 
+REM Check Oracle Java 21 (default install path)
+for /d %%d in ("C:\Program Files\Java\jdk-21*") do (
+    if exist "%%~d\bin\java.exe" (
+        set "JAVA_EXE=%%~d\bin\java.exe"
+        set "JAVA_HOME_SET=%%~d"
+        echo  [OK] Oracle JDK 21 found at %%~d
+        goto :check_maven
+    )
+)
+
 REM Check every java.exe on PATH (not just the first one)
 where java >nul 2>&1
 if %errorlevel% == 0 (
@@ -71,15 +81,21 @@ if %errorlevel% == 0 (
             findstr /i /r "21\." "%TOOLS%\jver.tmp" >nul 2>&1
             if !errorlevel! == 0 (
                 set "JAVA_EXE=%%p"
-                for %%j in ("%%p\..\..") do set "JAVA_HOME_SET=%%~fj"
+                REM Ask the JVM itself where its home is (handles Oracle javapath shims)
+                "%%p" -XshowSettings:properties -version >"%TOOLS%\jprop.tmp" 2>&1
             )
         )
     )
-    del "%TOOLS%\jver.tmp" >nul 2>&1
     if defined JAVA_EXE (
+        for /f "tokens=1,* delims==" %%a in ('findstr /c:"java.home" "%TOOLS%\jprop.tmp"') do (
+            for /f "tokens=*" %%t in ("%%b") do set "JAVA_HOME_SET=%%t"
+        )
+        del "%TOOLS%\jver.tmp" >nul 2>&1
+        del "%TOOLS%\jprop.tmp" >nul 2>&1
         echo  [OK] Java 21 found in system PATH
         goto :check_maven
     )
+    del "%TOOLS%\jver.tmp" >nul 2>&1
 )
 
 REM ---- Download Corretto 21 ZIP (no admin needed) ----
@@ -141,7 +157,7 @@ if %errorlevel% == 0 (
 )
 
 set "MVN_VERSION=3.9.9"
-echo  [!!] Maven not found. Downloading Apache Maven !MVN_VERSION!...
+echo  [^!^!] Maven not found. Downloading Apache Maven !MVN_VERSION!...
 
 set "MVN_ZIP=%TOOLS%\maven.zip"
 
