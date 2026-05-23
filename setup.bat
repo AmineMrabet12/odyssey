@@ -68,7 +68,7 @@ if %errorlevel% == 0 (
     for /f "delims=" %%p in ('where java') do (
         if not defined JAVA_EXE (
             "%%p" -version >"%TOOLS%\jver.tmp" 2>&1
-            findstr /i "version \"21\." "%TOOLS%\jver.tmp" >nul 2>&1
+            findstr /i /r "21\." "%TOOLS%\jver.tmp" >nul 2>&1
             if !errorlevel! == 0 (
                 set "JAVA_EXE=%%p"
                 for %%j in ("%%p\..\..") do set "JAVA_HOME_SET=%%~fj"
@@ -140,16 +140,17 @@ if %errorlevel% == 0 (
     goto :build
 )
 
-echo  [!!] Maven not found. Downloading Apache Maven 3.9.6...
+set "MVN_VERSION=3.9.9"
+echo  [!!] Maven not found. Downloading Apache Maven !MVN_VERSION!...
 
 set "MVN_ZIP=%TOOLS%\maven.zip"
-set "MVN_URL=https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.zip"
 
-powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%MVN_URL%' -OutFile '%MVN_ZIP%'"
-
+REM Try current mirror first, then archive (which always hosts old releases)
+call :download_maven "https://dlcdn.apache.org/maven/maven-3/!MVN_VERSION!/binaries/apache-maven-!MVN_VERSION!-bin.zip"
+if not exist "%MVN_ZIP%" call :download_maven "https://archive.apache.org/dist/maven/maven-3/!MVN_VERSION!/binaries/apache-maven-!MVN_VERSION!-bin.zip"
 if not exist "%MVN_ZIP%" (
-    set "MVN_URL=https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.zip"
-    powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%MVN_URL%' -OutFile '%MVN_ZIP%'"
+    set "MVN_VERSION=3.9.6"
+    call :download_maven "https://archive.apache.org/dist/maven/maven-3/!MVN_VERSION!/binaries/apache-maven-!MVN_VERSION!-bin.zip"
 )
 
 if not exist "%MVN_ZIP%" (
@@ -157,6 +158,13 @@ if not exist "%MVN_ZIP%" (
     pause
     exit /b 1
 )
+goto :extract_maven
+
+:download_maven
+powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; try { Invoke-WebRequest -Uri '%~1' -OutFile '%MVN_ZIP%' } catch { exit 1 }"
+exit /b 0
+
+:extract_maven
 
 echo  [..] Extracting Maven...
 powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; Expand-Archive -Path '%MVN_ZIP%' -DestinationPath '%TOOLS%\mtmp' -Force; $d=(Get-ChildItem '%TOOLS%\mtmp' -Directory | Select -First 1).FullName; if(Test-Path '%MVN_DIR%'){Remove-Item '%MVN_DIR%' -Recurse -Force}; Move-Item $d '%MVN_DIR%'; Remove-Item '%TOOLS%\mtmp' -Recurse -Force; Remove-Item '%MVN_ZIP%' -Force"
@@ -168,7 +176,7 @@ if not exist "%MVN_DIR%\bin\mvn.cmd" (
 )
 
 set "MVN_EXE=%MVN_DIR%\bin\mvn.cmd"
-echo  [OK] Maven 3.9.6 installed to .tools\maven\
+echo  [OK] Maven !MVN_VERSION! installed to .tools\maven\
 
 REM ================================================================
 REM  STEP 3 - Build
