@@ -22,59 +22,64 @@ REM ================================================================
 echo  [1/4] Checking Java 21...
 
 set "JAVA_EXE="
-set "JAVA_OK=0"
+set "JAVA_HOME_SET="
 
 REM Check bundled Java first (.tools\java)
 if exist "%JAVA_DIR%\bin\java.exe" (
     set "JAVA_EXE=%JAVA_DIR%\bin\java.exe"
-    set "JAVA_OK=1"
+    set "JAVA_HOME_SET=%JAVA_DIR%"
     echo  [OK] Java found in .tools\java\
     goto :check_maven
 )
 
 REM Check Amazon Corretto 21
 for /d %%d in ("C:\Program Files\Amazon Corretto\jdk21*") do (
-    if exist "%%d\bin\java.exe" (
-        set "JAVA_EXE=%%d\bin\java.exe"
-        set "JAVA_OK=1"
-        echo  [OK] Corretto 21 found at %%d
+    if exist "%%~d\bin\java.exe" (
+        set "JAVA_EXE=%%~d\bin\java.exe"
+        set "JAVA_HOME_SET=%%~d"
+        echo  [OK] Corretto 21 found at %%~d
         goto :check_maven
     )
 )
 
 REM Check Eclipse Adoptium / Temurin 21
 for /d %%d in ("C:\Program Files\Eclipse Adoptium\jdk-21*") do (
-    if exist "%%d\bin\java.exe" (
-        set "JAVA_EXE=%%d\bin\java.exe"
-        set "JAVA_OK=1"
-        echo  [OK] Temurin 21 found at %%d
+    if exist "%%~d\bin\java.exe" (
+        set "JAVA_EXE=%%~d\bin\java.exe"
+        set "JAVA_HOME_SET=%%~d"
+        echo  [OK] Temurin 21 found at %%~d
         goto :check_maven
     )
 )
 
 REM Check Microsoft OpenJDK 21
 for /d %%d in ("C:\Program Files\Microsoft\jdk-21*") do (
-    if exist "%%d\bin\java.exe" (
-        set "JAVA_EXE=%%d\bin\java.exe"
-        set "JAVA_OK=1"
-        echo  [OK] Microsoft JDK 21 found at %%d
+    if exist "%%~d\bin\java.exe" (
+        set "JAVA_EXE=%%~d\bin\java.exe"
+        set "JAVA_HOME_SET=%%~d"
+        echo  [OK] Microsoft JDK 21 found at %%~d
         goto :check_maven
     )
 )
 
-REM Check system PATH
-where java >/dev/null 2>&1
+REM Check every java.exe on PATH (not just the first one)
+where java >nul 2>&1
 if %errorlevel% == 0 (
-    java -version >"%TOOLS%\jver.tmp" 2>&1
-    findstr /i "version \"21\." "%TOOLS%\jver.tmp" >/dev/null 2>&1
-    if !errorlevel! == 0 (
-        set "JAVA_EXE=java"
-        set "JAVA_OK=1"
+    for /f "delims=" %%p in ('where java') do (
+        if not defined JAVA_EXE (
+            "%%p" -version >"%TOOLS%\jver.tmp" 2>&1
+            findstr /i "version \"21\." "%TOOLS%\jver.tmp" >nul 2>&1
+            if !errorlevel! == 0 (
+                set "JAVA_EXE=%%p"
+                for %%j in ("%%p\..\..") do set "JAVA_HOME_SET=%%~fj"
+            )
+        )
+    )
+    del "%TOOLS%\jver.tmp" >nul 2>&1
+    if defined JAVA_EXE (
         echo  [OK] Java 21 found in system PATH
-        del "%TOOLS%\jver.tmp" >/dev/null 2>&1
         goto :check_maven
     )
-    del "%TOOLS%\jver.tmp" >/dev/null 2>&1
 )
 
 REM ---- Download Corretto 21 ZIP (no admin needed) ----
@@ -108,7 +113,7 @@ if not exist "%JAVA_DIR%\bin\java.exe" (
 )
 
 set "JAVA_EXE=%JAVA_DIR%\bin\java.exe"
-set "JAVA_OK=1"
+set "JAVA_HOME_SET=%JAVA_DIR%"
 echo  [OK] Java 21 installed to .tools\java\
 
 REM ================================================================
@@ -119,19 +124,18 @@ echo.
 echo  [2/4] Checking Maven...
 
 set "MVN_EXE="
-set "MVN_OK=0"
 
 if exist "%MVN_DIR%\bin\mvn.cmd" (
     set "MVN_EXE=%MVN_DIR%\bin\mvn.cmd"
-    set "MVN_OK=1"
     echo  [OK] Maven found in .tools\maven\
     goto :build
 )
 
-where mvn >/dev/null 2>&1
+where mvn >nul 2>&1
 if %errorlevel% == 0 (
-    set "MVN_EXE=mvn"
-    set "MVN_OK=1"
+    for /f "delims=" %%p in ('where mvn') do (
+        if not defined MVN_EXE set "MVN_EXE=%%p"
+    )
     echo  [OK] Maven found in system PATH
     goto :build
 )
@@ -173,28 +177,24 @@ REM ================================================================
 echo.
 echo  [3/4] Building Odyssey (first time may take ~2 min to download deps)...
 
-REM Derive JAVA_HOME from JAVA_EXE
-if "%JAVA_EXE%"=="java" (
-    for /f "delims=" %%p in ('where java') do set "JAVA_BIN=%%p" & goto :got_jbin
-    :got_jbin
-    for %%f in ("!JAVA_BIN!") do set "JAVA_HOME_SET=%%~dpf"
-    set "JAVA_HOME_SET=!JAVA_HOME_SET:~0,-4!"
-) else (
-    for %%f in ("%JAVA_EXE%") do set "JAVA_HOME_SET=%%~dpf"
-    set "JAVA_HOME_SET=!JAVA_HOME_SET:~0,-5!"
-)
-
+REM Set JAVA_HOME and PATH for Maven
 set "JAVA_HOME=!JAVA_HOME_SET!"
-set "PATH=!JAVA_HOME!\bin;%MVN_DIR%\bin;%PATH%"
+set "PATH=!JAVA_HOME!\bin;%PATH%"
+
+echo  [..] JAVA_HOME = !JAVA_HOME!
+echo  [..] Java    = !JAVA_EXE!
+echo  [..] Maven   = !MVN_EXE!
+echo.
 
 cd /d "%ROOT%"
-call "%MVN_EXE%" clean package -DskipTests 2>"%ROOT%\build.log"
+call "!MVN_EXE!" clean package -DskipTests >"%ROOT%\build.log" 2>&1
 
 if %errorlevel% neq 0 (
     echo.
-    echo  [ERROR] Build failed! Check build.log for details.
-    echo.
-    type "%ROOT%\build.log" | findstr /i "ERROR BUILD"
+    echo  [ERROR] Build failed! Showing build.log:
+    echo  ----------------------------------------------------------------
+    type "%ROOT%\build.log"
+    echo  ----------------------------------------------------------------
     echo.
     pause
     exit /b 1
@@ -210,9 +210,9 @@ echo  [4/4] Saving environment config...
 
 (
     echo @echo off
-    echo set "ODYSSEY_JAVA=%JAVA_EXE%"
+    echo set "ODYSSEY_JAVA=!JAVA_EXE!"
     echo set "ODYSSEY_JAVA_HOME=!JAVA_HOME_SET!"
-    echo set "ODYSSEY_MVN=%MVN_EXE%"
+    echo set "ODYSSEY_MVN=!MVN_EXE!"
 ) > "%ROOT%\.env.bat"
 
 echo  [OK] Config saved to .env.bat
